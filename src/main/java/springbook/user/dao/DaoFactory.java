@@ -1,6 +1,5 @@
 package springbook.user.dao;
 
-import java.sql.DriverManager;
 import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

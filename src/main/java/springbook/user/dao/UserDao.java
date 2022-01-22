@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import lombok.Setter;
+import org.springframework.dao.EmptyResultDataAccessException;
 import springbook.user.domain.User;
 
 @Setter
@@ -37,18 +38,53 @@ public class UserDao {
     ps.setString(1, id);
 
     ResultSet rs = ps.executeQuery();
-    rs.next();
-    User user = User.builder()
-        .id(rs.getString("id"))
-        .name(rs.getString("name"))
-        .password(rs.getString("password"))
-        .build();
+
+    User user = null;
+    if (rs.next()) {
+      user = User.builder()
+          .id(rs.getString("id"))
+          .name(rs.getString("name"))
+          .password(rs.getString("password"))
+          .build();
+    }
 
     rs.close();
     ps.close();
     conn.close();
 
+    if (user == null) {
+      throw new EmptyResultDataAccessException(1);
+    }
+
     return user;
+  }
+
+  public void deleteAll() throws SQLException {
+    Connection conn = dataSource.getConnection();
+
+    PreparedStatement ps = conn.prepareStatement("delete from users");
+
+    ps.executeUpdate();
+
+    ps.close();
+    conn.close();
+  }
+
+  public int getCount() throws SQLException {
+    Connection conn = dataSource.getConnection();
+
+    PreparedStatement ps = conn.prepareStatement("select count(*) from users");
+
+    ResultSet rs = ps.executeQuery();
+
+    rs.next();
+    int count = rs.getInt(1);
+
+    rs.close();
+    ps.close();
+    conn.close();
+
+    return count;
   }
 
 }
