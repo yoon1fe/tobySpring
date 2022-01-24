@@ -14,12 +14,10 @@ public class UserDao {
 
   private DataSource dataSource;
 
-
-  public void add(User user) throws ClassNotFoundException, SQLException {
+  public void add(User user) throws SQLException {
     Connection conn = dataSource.getConnection();
 
-    PreparedStatement ps = conn.prepareStatement(
-        "insert into users(id, name, password) values(?,?,?)");
+    PreparedStatement ps = conn.prepareStatement("insert into users(id, name, password) values(?,?,?)");
     ps.setString(1, user.getId());
     ps.setString(2, user.getName());
     ps.setString(3, user.getPassword());
@@ -31,7 +29,7 @@ public class UserDao {
   }
 
 
-  public User get(String id) throws ClassNotFoundException, SQLException {
+  public User get(String id) throws SQLException {
     Connection conn = dataSource.getConnection();
 
     PreparedStatement ps = conn.prepareStatement("select * from users where id = ?");

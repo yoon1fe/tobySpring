@@ -4,15 +4,24 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.sql.SQLException;
+import javax.sql.DataSource;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import springbook.user.domain.User;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = DaoFactory.class)
 public class UserDaoTest {
 
+  @Autowired
   private UserDao dao;
   private User user1;
   private User user2;
@@ -20,16 +29,13 @@ public class UserDaoTest {
 
   @Before
   public void setUp() {
-    ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
-    this.dao = context.getBean("userDao", UserDao.class);
-
     this.user1 = User.builder().id("yoon1fe").name("yoon1fe").password("1234").build();
     this.user2 = User.builder().id("yoon2fe").name("yoon2fe").password("1234").build();
     this.user3 = User.builder().id("yoon3fe").name("yoon3fe").password("1234").build();
   }
 
   @Test
-  public void addAndGet() throws SQLException, ClassNotFoundException {
+  public void addAndGet() throws SQLException {
     dao.deleteAll();
     assertThat(dao.getCount(), is(0));
 
@@ -45,7 +51,7 @@ public class UserDaoTest {
   }
 
   @Test
-  public void count() throws SQLException, ClassNotFoundException {
+  public void count() throws SQLException {
     dao.deleteAll();
     assertThat(dao.getCount(), is(0));
 
@@ -62,7 +68,7 @@ public class UserDaoTest {
   }
 
   @Test(expected = EmptyResultDataAccessException.class)
-  public void getUserFailure() throws SQLException, ClassNotFoundException {
+  public void getUserFailure() throws SQLException {
     dao.deleteAll();
     assertThat(dao.getCount(), is(0));
 
