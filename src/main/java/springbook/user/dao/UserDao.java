@@ -5,28 +5,29 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.dao.EmptyResultDataAccessException;
 import springbook.user.domain.User;
 
-@Setter
+@Data
 public class UserDao {
 
   private DataSource dataSource;
+  private JdbcContext jdbcContext;
 
   public void add(User user) throws SQLException {
 
-    try (
-        Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement("insert into users(id, name, password) values(?,?,?)");
-    ) {
+    StatementStrategy st = c -> {
+      PreparedStatement ps = c.prepareStatement("insert into users(id, name, password) values(?,?,?)");
+
       ps.setString(1, user.getId());
       ps.setString(2, user.getName());
       ps.setString(3, user.getPassword());
 
-      ps.executeUpdate();
-    }
+      return ps;
+    };
 
+    jdbcContext.workWithStatementStrategy(st);
   }
 
 
@@ -58,8 +59,8 @@ public class UserDao {
   }
 
   public void deleteAll() throws SQLException {
-    StatementStrategy strategy = new DeleteAllStatement();
-    jdbcContextWithStatementStrategy(strategy);
+    StatementStrategy strategy = c -> c.prepareStatement("delete from users");
+    jdbcContext.workWithStatementStrategy(strategy);
   }
 
   public int getCount() throws SQLException {
@@ -71,15 +72,6 @@ public class UserDao {
       rs.next();
 
       return rs.getInt(1);
-    }
-  }
-
-  public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
-    try (
-        Connection conn = dataSource.getConnection();
-        PreparedStatement ps = stmt.makePreparedStatement(conn);
-    ) {
-      ps.executeUpdate();
     }
   }
 

@@ -12,19 +12,18 @@ public class DaoFactory {
   public UserDao userDao() {
     UserDao userDao = new UserDao();
     userDao.setDataSource(dataSource());
+    userDao.setJdbcContext(jdbcContext());
 
     return userDao;
   }
 
-//  public AccountDao accountDao() {
-//    ConnectionMaker connectionMaker = new AConnectionMaker();
-//    return new AccountDao(connectionMaker());
-//  }
-//
-//  public MessageDao messageDao() {
-//    ConnectionMaker connectionMaker = new AConnectionMaker();
-//    return new MessageDao(connectionMaker());
-//  }
+  @Bean
+  public JdbcContext jdbcContext() {
+    JdbcContext jdbcContext = new JdbcContext();
+    jdbcContext.setDataSource(dataSource());
+
+    return jdbcContext;
+  }
 
   @Bean
   public DataSource dataSource() {
