@@ -4,6 +4,7 @@ import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import springbook.user.service.UserService;
 
 @Configuration
 public class DaoFactory {
@@ -14,6 +15,15 @@ public class DaoFactory {
     userDao.setDataSource(dataSource());
 
     return userDao;
+  }
+
+  @Bean
+  public UserService userService(UserDao userDao) {
+    UserService userService = new UserService();
+    userService.setUserDao(userDao);
+
+    return userService;
+
   }
 
   @Bean

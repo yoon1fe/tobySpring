@@ -3,7 +3,6 @@ package springbook.user.dao;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.sql.SQLException;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import springbook.user.domain.Level;
 import springbook.user.domain.User;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -26,13 +26,13 @@ public class UserDaoTest {
 
   @Before
   public void setUp() {
-    this.user1 = User.builder().id("yoon1fe").name("yoon1fe").password("1234").build();
-    this.user2 = User.builder().id("yoon2fe").name("yoon2fe").password("1234").build();
-    this.user3 = User.builder().id("yoon3fe").name("yoon3fe").password("1234").build();
+    this.user1 = User.builder().id("yoon1fe").name("yoon1fe").password("1234").level(Level.BASIC).login(1).recommend(0).build();
+    this.user2 = User.builder().id("yoon2fe").name("yoon2fe").password("1234").level(Level.SILVER).login(55).recommend(10).build();
+    this.user3 = User.builder().id("yoon3fe").name("yoon3fe").password("1234").level(Level.GOLD).login(100).recommend(40).build();
   }
 
   @Test
-  public void addAndGet() throws SQLException {
+  public void addAndGet() {
     dao.deleteAll();
     assertThat(dao.getCount(), is(0));
 
@@ -48,7 +48,7 @@ public class UserDaoTest {
   }
 
   @Test
-  public void count() throws SQLException {
+  public void count() {
     dao.deleteAll();
     assertThat(dao.getCount(), is(0));
 
@@ -57,6 +57,9 @@ public class UserDaoTest {
           .id("yoon1fe" + i)
           .name("yoon1fe")
           .password("1234")
+          .level(Level.valueOf(i))
+          .login(0)
+          .recommend(1)
           .build();
 
       dao.add(user);
@@ -65,7 +68,7 @@ public class UserDaoTest {
   }
 
   @Test(expected = EmptyResultDataAccessException.class)
-  public void getUserFailure() throws SQLException {
+  public void getUserFailure() {
     dao.deleteAll();
     assertThat(dao.getCount(), is(0));
 
@@ -73,7 +76,7 @@ public class UserDaoTest {
   }
 
   @Test
-  public void getAll() throws SQLException {
+  public void getAll() {
     dao.deleteAll();
 
     List<User> users0 = dao.getAll();
@@ -90,10 +93,31 @@ public class UserDaoTest {
     checkSameUser(user3, users.get(2));
   }
 
+  @Test
+  public void update() {
+    dao.deleteAll();
+
+    dao.add(user1);
+
+    user1.setName("wowow");
+    user1.setPassword("123456");
+    user1.setLevel(Level.GOLD);
+    user1.setLogin(1000);
+    user1.setRecommend(999);
+    int result = dao.update(user1);
+
+    User user1update = dao.get(user1.getId());
+    checkSameUser(user1, user1update);
+    assertThat(result, is(1));
+  }
+
   private void checkSameUser(User user1, User user2) {
     assertThat(user1.getId(), is(user2.getId()));
     assertThat(user1.getName(), is(user2.getName()));
     assertThat(user1.getPassword(), is(user2.getPassword()));
+    assertThat(user1.getLevel(), is(user2.getLevel()));
+    assertThat(user1.getLogin(), is(user2.getLogin()));
+    assertThat(user1.getRecommend(), is(user2.getRecommend()));
   }
 
 }
