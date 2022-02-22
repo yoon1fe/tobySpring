@@ -4,6 +4,8 @@ import javax.sql.DataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import springbook.user.service.UserLevelUpgradePolicy;
+import springbook.user.service.UserLevelUpgradePolicyImpl;
 import springbook.user.service.UserService;
 
 @Configuration
@@ -18,12 +20,18 @@ public class DaoFactory {
   }
 
   @Bean
-  public UserService userService(UserDao userDao) {
+  public UserService userService(UserDao userDao, UserLevelUpgradePolicy policy) {
     UserService userService = new UserService();
     userService.setUserDao(userDao);
+    userService.setUserLevelUpgradePolicy(policy);
 
     return userService;
 
+  }
+
+  @Bean
+  public UserLevelUpgradePolicy userLevelUpgradePolicy() {
+    return new UserLevelUpgradePolicyImpl();
   }
 
   @Bean

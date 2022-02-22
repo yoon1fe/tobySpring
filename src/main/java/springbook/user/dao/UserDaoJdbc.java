@@ -1,7 +1,5 @@
 package springbook.user.dao;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,19 +10,14 @@ import springbook.user.domain.User;
 public class UserDaoJdbc implements UserDao {
 
   private RowMapper<User> userRowMapper =
-      new RowMapper<User>() {
-        @Override
-        public User mapRow(ResultSet rs, int i) throws SQLException {
-          return User.builder()
-              .id(rs.getString("id"))
-              .name(rs.getString("name"))
-              .password(rs.getString("password"))
-              .level(Level.valueOf(rs.getInt("level")))
-              .login(rs.getInt("login"))
-              .recommend(rs.getInt("recommend"))
-              .build();
-        }
-      };
+      (rs, i) -> User.builder()
+          .id(rs.getString("id"))
+          .name(rs.getString("name"))
+          .password(rs.getString("password"))
+          .level(Level.valueOf(rs.getInt("level")))
+          .login(rs.getInt("login"))
+          .recommend(rs.getInt("recommend"))
+          .build();
 
   private JdbcTemplate jdbcTemplate;
 
