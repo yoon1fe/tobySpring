@@ -7,6 +7,7 @@ import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 import springbook.user.service.UserLevelUpgradePolicy;
 import springbook.user.service.UserLevelUpgradePolicyImpl;
 import springbook.user.service.UserService;
+import springbook.user.service.UserServiceImpl;
 
 @Configuration
 public class DaoFactory {
@@ -21,7 +22,7 @@ public class DaoFactory {
 
   @Bean
   public UserService userService(UserDao userDao, UserLevelUpgradePolicy policy) {
-    UserService userService = new UserService();
+    UserServiceImpl userService = new UserServiceImpl();
     userService.setUserDao(userDao);
     userService.setUserLevelUpgradePolicy(policy);
 
