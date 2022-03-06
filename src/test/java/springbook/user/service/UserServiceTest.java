@@ -3,11 +3,15 @@ package springbook.user.service;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.*;
 import static springbook.user.service.UserServiceImpl.MIN_LOGCOUNT_FOR_SILVER;
 import static springbook.user.service.UserServiceImpl.MIN_RECOMMEND_FOR_GOLD;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import lombok.Getter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,16 +52,22 @@ public class UserServiceTest {
 
   @Test
   public void upgradeLevels() throws Exception {
-    userDao.deleteAll();
-    for (User user : users) userDao.add(user);
+    UserServiceImpl userServiceImpl = new UserServiceImpl();
 
-    userService.upgradeLevels();
+    UserLevelUpgradePolicy userLevelUpgradePolicy = new UserLevelUpgradePolicyImpl();
+    UserDao mockUserDao = mock(UserDao.class);
+    when(mockUserDao.getAll()).thenReturn(this.users);
 
-    checkLevelUpgraded(users.get(0), false);
-    checkLevelUpgraded(users.get(1), true);
-    checkLevelUpgraded(users.get(2), false);
-    checkLevelUpgraded(users.get(3), true);
-    checkLevelUpgraded(users.get(4), false);
+    userServiceImpl.setUserDao(mockUserDao);
+    userServiceImpl.setUserLevelUpgradePolicy(userLevelUpgradePolicy);
+
+    userServiceImpl.upgradeLevels();
+
+    verify(mockUserDao, times(2)).update(any((User.class)));
+    verify(mockUserDao).update(users.get(1));
+    assertThat(users.get(1).getLevel(), is(Level.SILVER));
+    verify(mockUserDao).update(users.get(3));
+    assertThat(users.get(3).getLevel(), is(Level.GOLD));
   }
 
   private void checkLevelUpgraded(User user, boolean upgraded) {
@@ -67,6 +77,11 @@ public class UserServiceTest {
     } else {
       assertThat(userUpdate.getLevel(), is(user.getLevel()));
     }
+  }
+
+  private void checkUserAndLevel(User updated, String expectedId, Level expectedLevel) {
+    assertThat(updated.getId(), is(expectedId));
+    assertThat(updated.getLevel(), is(expectedLevel));
   }
 
   @Test
@@ -86,4 +101,47 @@ public class UserServiceTest {
     assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
     assertThat(userWithoutLevelRead.getLevel(), is(userWithoutLevel.getLevel()));
   }
+
+  @Getter
+  static class MockUserDao implements UserDao {
+
+    private List<User> users;
+    private List<User> updated = new ArrayList<>();
+
+    private MockUserDao(List<User> users) {
+      this.users = users;
+    }
+
+    @Override
+    public void add(User user) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public User get(String id) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<User> getAll() {
+      return this.users;
+    }
+
+    @Override
+    public void deleteAll() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int getCount() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int update(User user) {
+      updated.add(user);
+      return 1;
+    }
+  }
+
 }
