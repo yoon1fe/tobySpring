@@ -1,6 +1,8 @@
 package springbook.user.dao;
 
 import javax.sql.DataSource;
+
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
@@ -53,6 +55,11 @@ public class DaoFactory {
     dataSource.setPassword("book");
 
     return dataSource;
+  }
+
+  @Bean
+  public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator() {
+    return new DefaultAdvisorAutoProxyCreator();
   }
 
 }
